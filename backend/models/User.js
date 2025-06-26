@@ -1,4 +1,4 @@
-// backend/models/User.js
+
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -24,13 +24,13 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  // Simple stats for now
+
   problemsSolved: {
     type: Number,
     default: 0
   }
 }, {
-  timestamps: true // This automatically adds createdAt and updatedAt
+  timestamps: true 
 });
 
 module.exports = mongoose.model('User', userSchema);
