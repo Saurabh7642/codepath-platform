@@ -215,7 +215,16 @@ const ProblemDetail = () => {
 
             {/* Action Buttons */}
             <div className="flex space-x-4 pt-6 border-t border-gray-200">
-              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button
+                onClick={() => {
+                  if (slug) {
+                    navigate(`/online-judge/${slug}`);
+                  } else {
+                    navigate('/');
+                  }
+                }}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 Start Coding
               </button>
               <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">

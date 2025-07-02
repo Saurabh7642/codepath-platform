@@ -22,6 +22,9 @@ import Dashboard from './pages/Dashboard';
 import Learning from './pages/Learning';
 import Profile from './pages/Profile';
 
+// Online Judge Page
+import OnlineJudge from './pages/OnlineJudge';
+
 function App() {
   return (
     <AuthProvider>
@@ -63,6 +66,9 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Online Judge Route */}
+            <Route path="/online-judge/:slug" element={<OnlineJudge />} />
 
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
