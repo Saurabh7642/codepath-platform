@@ -16,6 +16,7 @@ const ProblemForm = () => {
   const [tags, setTags] = useState('');
   const [constraints, setConstraints] = useState('');
   const [examples, setExamples] = useState([{ input: '', output: '', explanation: '' }]);
+  const [testcases, setTestcases] = useState([{ input: '', expectedOutput: '', isSample: false }]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -37,6 +38,7 @@ const ProblemForm = () => {
             setTags(p.tags.join(', '));
             setConstraints(p.constraints);
             setExamples(p.examples.length > 0 ? p.examples : [{ input: '', output: '', explanation: '' }]);
+            setTestcases(res.data.testcases.length > 0 ? res.data.testcases : [{ input: '', expectedOutput: '', isSample: false }]);
           } else {
             setError('Failed to load problem');
           }
@@ -60,6 +62,25 @@ const ProblemForm = () => {
     setExamples(newExamples);
   };
 
+  const handleTestcaseChange = (index, field, value) => {
+    const newTestcases = [...testcases];
+    if (field === 'isSample') {
+      newTestcases[index][field] = value;
+    } else {
+      newTestcases[index][field] = value;
+    }
+    setTestcases(newTestcases);
+  };
+
+  const addTestcase = () => {
+    setTestcases([...testcases, { input: '', expectedOutput: '', isSample: false }]);
+  };
+
+  const removeTestcase = (index) => {
+    const newTestcases = testcases.filter((_, i) => i !== index);
+    setTestcases(newTestcases);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -71,7 +92,8 @@ const ProblemForm = () => {
       difficulty,
       tags: tags.split(',').map(t => t.trim()).filter(t => t),
       constraints,
-      examples
+      examples,
+      testcases
     };
 
     // Include slug only for create (not for edit) very important
@@ -208,6 +230,54 @@ const ProblemForm = () => {
             className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Add Example
+          </button>
+        </div>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Testcases</label>
+          {testcases.map((testcase, index) => (
+            <div key={index} className="mb-3 border p-3 rounded">
+              <div className="mb-2">
+                <label className="block font-medium mb-1">Input</label>
+                <textarea
+                  value={testcase.input}
+                  onChange={e => handleTestcaseChange(index, 'input', e.target.value)}
+                  rows={2}
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                />
+              </div>
+              <div className="mb-2">
+                <label className="block font-medium mb-1">Expected Output</label>
+                <textarea
+                  value={testcase.expectedOutput}
+                  onChange={e => handleTestcaseChange(index, 'expectedOutput', e.target.value)}
+                  rows={2}
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                />
+              </div>
+              <div className="mb-2 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={testcase.isSample}
+                  onChange={e => handleTestcaseChange(index, 'isSample', e.target.checked)}
+                  id={`isSample-${index}`}
+                />
+                <label htmlFor={`isSample-${index}`}>Is Sample Testcase</label>
+              </div>
+              <button
+                type="button"
+                onClick={() => removeTestcase(index)}
+                className="text-red-600 hover:underline"
+              >
+                Remove Testcase
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addTestcase}
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Add Testcase
           </button>
         </div>
         <button

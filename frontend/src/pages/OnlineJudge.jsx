@@ -2,29 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import CodeEditor from '../components/CodeEditor';
+import { useAuth } from '../context/AuthContext';
+import RecentSubmissionsTable from '../components/dashboard/RecentSubmissionsTable';
 
 const OnlineJudge = () => {
   const { slug } = useParams();
+  const { user, refreshUser } = useAuth();
   const [problem, setProblem] = useState(null);
+  const [testcases, setTestcases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [code, setCode] = useState(
-  `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(0);\n    cin.tie(0);\n    \n    // Your code here\n    \n    return 0;\n}`
-);
+    `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(0);\n    cin.tie(0);\n    \n    // Your code here\n    \n    return 0;\n}`
+  );
 
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
+  const [results, setResults] = useState([]);
   const [running, setRunning] = useState(false);
+  const [recentSubmissions, setRecentSubmissions] = useState([]);
 
   useEffect(() => {
-    fetchProblem();
+    fetchProblemAndTestcases();
+    fetchRecentSubmissions();
   }, [slug]);
 
-  const fetchProblem = async () => {
+  const fetchProblemAndTestcases = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/problems/${slug}`);
       if (response.data.success) {
         setProblem(response.data.problem);
+        setTestcases(response.data.testcases || []);
       } else {
         setError('Problem not found');
       }
@@ -36,8 +44,99 @@ const OnlineJudge = () => {
     }
   };
 
-  const handleRun = async () => {
-    setRunning(true);
+  const fetchRecentSubmissions = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/user/submissions/recent?problemId=${problem?._id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      console.log('fetchRecentSubmissions response:', response.data);
+      if (response.data.success) {
+        setRecentSubmissions(response.data.recentSubmissions);
+      }
+    } catch (error) {
+      console.error('Error fetching recent submissions:', error);
+    }
+  };
+
+  useEffect(() => {
+    const handleSubmissionSuccess = () => {
+      console.log('submissionSuccess event received');
+      fetchRecentSubmissions();
+      refreshUser();
+      console.log('Submission success event handled, recent submissions updated');
+    };
+
+    window.addEventListener('submissionSuccess', handleSubmissionSuccess);
+
+    return () => {
+      window.removeEventListener('submissionSuccess', handleSubmissionSuccess);
+    };
+  }, [refreshUser]);
+
+  const handleRunAll = async () => {
+    setRunning('all');
+    setResults([]);
+    try {
+      const resultsArray = [];
+      for (const testcase of testcases) {
+        const response = await axios.post('http://localhost:8000/run', {
+          language: 'cpp',
+          code,
+          input: testcase.input,
+        });
+        if (response.data.success) {
+          const output = response.data.output.trim();
+          const expected = testcase.expectedOutput.trim();
+          const passed = output === expected;
+          resultsArray.push({
+            input: testcase.input,
+            expectedOutput: testcase.expectedOutput,
+            output,
+            passed,
+            isSample: testcase.isSample,
+          });
+        } else {
+          resultsArray.push({
+            input: testcase.input,
+            expectedOutput: testcase.expectedOutput,
+            output: response.data.error || 'Error during execution',
+            passed: false,
+            isSample: testcase.isSample,
+          });
+        }
+      }
+      setResults(resultsArray);
+      if (resultsArray.every(r => r.passed)) {
+        try {
+          console.log('Submitting solved problem for problem ID:', problem._id);
+          const token = localStorage.getItem('token');
+          await axios.post(`http://localhost:5000/api/submissions`, {
+            problemId: problem._id,
+            status: 'Accepted',
+            language: 'cpp',
+            code: code
+          }, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          console.log('Submission request sent');
+          await refreshUser();
+          window.dispatchEvent(new Event('submissionSuccess'));
+        } catch (error) {
+          console.error('Error updating user solved problems:', error);
+        }
+      }
+      console.log('Submission API call completed');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Error connecting to compiler server');
+    } finally {
+      setRunning(null);
+    }
+  };
+
+  const handleRunCustom = async () => {
+    setRunning('custom');
     setOutput('');
     try {
       const response = await axios.post('http://localhost:8000/run', {
@@ -45,7 +144,6 @@ const OnlineJudge = () => {
         code,
         input,
       });
-      console.log('Compiler server response:', response.data);
       if (response.data.success) {
         setOutput(response.data.output);
       } else {
@@ -54,7 +152,7 @@ const OnlineJudge = () => {
     } catch (err) {
       setOutput(err.response?.data?.error || 'Error connecting to compiler server');
     } finally {
-      setRunning(false);
+      setRunning(null);
     }
   };
 
@@ -110,15 +208,60 @@ const OnlineJudge = () => {
           onChange={(e) => setInput(e.target.value)}
         />
         <button
-          onClick={handleRun}
+          onClick={handleRunCustom}
           disabled={running}
-          className="mt-4 px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          title="Compile and run with custom input"
+          className={`mt-4 px-6 py-3 rounded text-white ${
+            running ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+          }`}
         >
           {running ? 'Running...' : 'Compile & Run'}
         </button>
         <pre className="mt-4 p-4 bg-gray-900 text-green-400 rounded whitespace-pre-wrap min-h-[100px]">
           {output}
         </pre>
+        <button
+          onClick={handleRunAll}
+          disabled={running}
+          title="Submit code"
+          className={`mt-4 px-6 py-3 rounded text-white ${
+            running ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+          }`}
+        >
+          {running ? 'Submitting...' : 'Submit'}
+        </button>
+        <div className="mt-4 overflow-y-auto max-h-[300px] bg-white rounded shadow p-4">
+          {results.length > 0 && (
+            results.every(r => r.passed) ? (
+              <div className="mb-3 p-3 rounded bg-green-100 text-green-800 text-center font-semibold">
+                <div>All Testcases Passed ✅</div>
+              </div>
+            ) : (
+              results.map((result, idx) => (
+                <div
+                  key={idx}
+                  className={`mb-3 p-3 rounded ${
+                    result.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {result.isSample && (
+                    <>
+                      <div><strong>Sample Testcase #{idx + 1}</strong></div>
+                      <div><strong>Input:</strong> <pre className="whitespace-pre-wrap">{result.input}</pre></div>
+                      <div><strong>Expected Output:</strong> <pre className="whitespace-pre-wrap">{result.expectedOutput}</pre></div>
+                      <div><strong>Your Output:</strong> <pre className="whitespace-pre-wrap">{result.output}</pre></div>
+                      <div><strong>Result:</strong> {result.passed ? 'Passed ✅' : 'Failed ❌'}</div>
+                    </>
+                  )}
+                  {!result.isSample && !result.passed && (
+                    <div><strong>Wrong Answer ❌</strong></div>
+                  )}
+                </div>
+              ))
+            )
+          )}
+        </div>
+        <RecentSubmissionsTable recentSubmissions={recentSubmissions} />
       </div>
     </div>
   );

@@ -46,6 +46,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Expose refreshUser to update user profile
+  const refreshUser = async () => {
+    console.log('refreshUser called');
+    setLoading(true);
+    await getUserProfile();
+    console.log('refreshUser completed');
+  };
+
   // Register function
   const register = async (username, email, password) => {
     try {
@@ -122,7 +130,8 @@ export const AuthProvider = ({ children }) => {
     loading,
     register,
     login,
-    logout
+    logout,
+    refreshUser
   };
 
   return (

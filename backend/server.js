@@ -20,7 +20,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/codepath'
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/problems', require('./routes/problems'));
-
+app.use('/api/user', require('./routes/user'));
+app.use('/api/submissions', require('./routes/submissions'));
 
 app.get('/', (req, res) => {
   res.json({ message: 'CodePath API is running!' });
