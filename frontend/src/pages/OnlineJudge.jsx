@@ -4,6 +4,7 @@ import axios from 'axios';
 import CodeEditor from '../components/CodeEditor';
 import { useAuth } from '../context/AuthContext';
 import RecentSubmissionsTable from '../components/dashboard/RecentSubmissionsTable';
+import AiCodeAnalysisBox from '../components/AiCodeAnalysisBox';
 
 const OnlineJudge = () => {
   const { slug } = useParams();
@@ -21,6 +22,8 @@ const OnlineJudge = () => {
   const [results, setResults] = useState([]);
   const [running, setRunning] = useState(false);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
+  const [aiAnalysis, setAiAnalysis] = useState('');
+  const [loadingAiAnalysis, setLoadingAiAnalysis] = useState(false);
 
   useEffect(() => {
     fetchProblemAndTestcases();
@@ -73,9 +76,35 @@ const OnlineJudge = () => {
     };
   }, [refreshUser]);
 
+  const fetchAiCodeAnalysis = async (code) => {
+    setLoadingAiAnalysis(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('http://localhost:5000/api/submissions/ai-analysis', {
+        code,
+        language: 'cpp',
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data.success) {
+        setAiAnalysis(response.data.analysis);
+      } else {
+        setAiAnalysis('Failed to get AI analysis');
+      }
+    } catch (error) {
+      console.error('Error fetching AI code analysis:', error);
+      setAiAnalysis('Error fetching AI analysis');
+    } finally {
+      setLoadingAiAnalysis(false);
+    }
+  };
+
   const handleRunAll = async () => {
     setRunning('all');
     setResults([]);
+    setAiAnalysis('');
     try {
       const resultsArray = [];
       for (const testcase of testcases) {
@@ -123,6 +152,8 @@ const OnlineJudge = () => {
           console.log('Submission request sent');
           await refreshUser();
           window.dispatchEvent(new Event('submissionSuccess'));
+          // Fetch AI code analysis after successful submission
+          fetchAiCodeAnalysis(code);
         } catch (error) {
           console.error('Error updating user solved problems:', error);
         }
@@ -262,6 +293,13 @@ const OnlineJudge = () => {
           )}
         </div>
         <RecentSubmissionsTable recentSubmissions={recentSubmissions} />
+        {loadingAiAnalysis ? (
+          <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded text-center font-semibold">
+            Loading AI Code Analysis...
+          </div>
+        ) : (
+          aiAnalysis && <AiCodeAnalysisBox analysis={aiAnalysis} />
+        )}
       </div>
     </div>
   );

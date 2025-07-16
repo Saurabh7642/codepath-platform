@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const authMiddleware = require('../middleware/auth');
 const Submission = require('../models/Submission');
 const User = require('../models/User');
+const { getAiCodeAnalysis } = require('../utils/aiCodeReview');
 
 // POST /api/submissions - Create a new submission and update user stats
 router.post('/', authMiddleware, async (req, res) => {
@@ -49,5 +50,22 @@ router.post('/', authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
+
+// POST /api/submissions/ai-analysis - Get AI code analysis for submitted code
+router.post('/ai-analysis', authMiddleware, async (req, res) => {
+  try {
+    const { code, language } = req.body;
+    if (!code || !language) {
+      return res.status(400).json({ success: false, message: 'Code and language are required' });
+    }
+
+    const analysis = await getAiCodeAnalysis(code, language);
+    res.json({ success: true, analysis });
+  } catch (error) {
+    console.error('Error in AI code analysis:', error);
+    res.status(500).json({ success: false, message: 'Failed to get AI code analysis' });
+  }
+});
+
 
 module.exports = router;
