@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -24,6 +23,9 @@ import Profile from './pages/Profile';
 
 // Online Judge Page
 import OnlineJudge from './pages/OnlineJudge';
+
+// Contest Calendar Page
+import ContestCalendar from './pages/ContestCalendar';
 
 function App() {
   return (
@@ -69,6 +71,9 @@ function App() {
 
             {/* Online Judge Route */}
             <Route path="/online-judge/:slug" element={<OnlineJudge />} />
+
+            {/* Contest Calendar Route */}
+            <Route path="/contests" element={<ContestCalendar />} />
 
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />

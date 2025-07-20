@@ -49,6 +49,12 @@ const Header = () => {
             >
               Profile
             </Link>
+            <Link
+              to="/contests"
+              className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition duration-200"
+            >
+              Contest Calendar
+            </Link>
           </nav>
 
           {/* Right side buttons */}
@@ -110,13 +116,6 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Learn
-              </Link>
-              <Link
-                to="/profile"
-                className="text-gray-700 hover:text-primary-500 block px-3 py-2 rounded-md text-base font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Profile
               </Link>
               <div className="flex flex-col space-y-2 px-3 py-2">
                 {user ? (

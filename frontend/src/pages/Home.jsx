@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Code, BookOpen, Trophy, Users } from 'lucide-react';
+import ContestList from '../components/ContestList';
 
 const Home = () => {
   const { user } = useAuth();
@@ -69,6 +70,13 @@ const Home = () => {
               <p className="text-gray-600">Connect with fellow programmers and learn together</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Contest List Section */}
+      <section className="py-20 bg-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ContestList />
         </div>
       </section>
 
