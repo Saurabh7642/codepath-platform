@@ -73,12 +73,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Contest List Section */}
-      <section className="py-20 bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ContestList />
-        </div>
-      </section>
+
 
       {/* Stats Section */}
       <section className="bg-indigo-800 text-white py-16">
