@@ -209,7 +209,7 @@ const OnlineJudge = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row max-w-7xl mx-auto p-4 gap-4">
       <div className="lg:w-1/2 bg-white rounded-lg shadow-lg p-6 overflow-y-auto max-h-screen">
-        <h1 className="text-2xl font-bold mb-4">{problem.title}</h1>
+        <h1 className="text-2xl font-bold mb-4 text-black">{problem.title}</h1>
         <div className="prose max-w-none whitespace-pre-line">{problem.description}</div>
         {problem.constraints && (
           <>
