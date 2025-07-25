@@ -17,7 +17,7 @@ const ProblemDetail = () => {
 
   const fetchProblem = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/problems/${slug}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/problems/${slug}`);
       if (response.data.success) {
         setProblem(response.data.problem);
       } else {
@@ -49,7 +49,7 @@ const ProblemDetail = () => {
       return;
     }
     try {
-      await axios.delete(`http://localhost:5000/api/problems/${slug}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/problems/${slug}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }

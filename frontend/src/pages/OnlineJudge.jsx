@@ -32,7 +32,7 @@ const OnlineJudge = () => {
 
   const fetchProblemAndTestcases = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/problems/${slug}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/problems/${slug}`);
       if (response.data.success) {
         setProblem(response.data.problem);
         setTestcases(response.data.testcases || []);
@@ -49,7 +49,7 @@ const OnlineJudge = () => {
 
   const fetchRecentSubmissions = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/user/submissions/recent?problemId=${problem?._id}`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/user/submissions/recent?problemId=${problem?._id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       console.log('fetchRecentSubmissions response:', response.data);
@@ -80,7 +80,7 @@ const OnlineJudge = () => {
     setLoadingAiAnalysis(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:5000/api/submissions/ai-analysis', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/submissions/ai-analysis`, {
         code,
         language: 'cpp',
       }, {
@@ -108,8 +108,8 @@ const OnlineJudge = () => {
     try {
       const resultsArray = [];
       for (const testcase of testcases) {
-        const response = await axios.post('http://localhost:8000/run', {
-          language: 'cpp',
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}`, {
+        language: 'cpp',
           code,
           input: testcase.input,
         });
@@ -139,7 +139,7 @@ const OnlineJudge = () => {
         try {
           console.log('Submitting solved problem for problem ID:', problem._id);
           const token = localStorage.getItem('token');
-          await axios.post(`http://localhost:5000/api/submissions`, {
+          await axios.post(`${import.meta.env.VITE_API_URL}/submissions`, {
             problemId: problem._id,
             status: 'Accepted',
             language: 'cpp',
@@ -170,7 +170,7 @@ const OnlineJudge = () => {
     setRunning('custom');
     setOutput('');
     try {
-      const response = await axios.post('http://localhost:8000/run', {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}`, {
         language: 'cpp',
         code,
         input,

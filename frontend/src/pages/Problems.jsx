@@ -16,7 +16,7 @@ const Problems = () => {
 
   const fetchProblems = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/problems');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/problems`);
       if (response.data.success) {
         setProblems(response.data.problems);
       } else {

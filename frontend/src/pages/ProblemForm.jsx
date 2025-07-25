@@ -27,7 +27,7 @@ const ProblemForm = () => {
     const queryParams = new URLSearchParams(location.search);
     const editSlug = slug || queryParams.get('edit');
     if (editSlug) {
-      axios.get(`http://localhost:5000/api/problems/${editSlug}`)
+      axios.get(`${import.meta.env.VITE_API_URL}/problems/${editSlug}`)
         .then(res => {
           if (res.data.success) {
             const p = res.data.problem;
@@ -104,9 +104,9 @@ const ProblemForm = () => {
     try {
       const editSlug = slug || new URLSearchParams(location.search).get('edit');
       if (editSlug) {
-        await axios.put(`http://localhost:5000/api/problems/${editSlug}`, problemData);
+        await axios.put(`${import.meta.env.VITE_API_URL}/problems/${editSlug}`, problemData);
       } else {
-        await axios.post('http://localhost:5000/api/problems', problemData);
+        await axios.post(`${import.meta.env.VITE_API_URL}/problems`, problemData);
       }
       navigate('/problems');
     } catch (err) {

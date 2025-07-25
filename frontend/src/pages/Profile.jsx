@@ -25,7 +25,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserStats = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/user/stats', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/user/stats`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (response.data.success) {
@@ -43,7 +43,7 @@ const Profile = () => {
 
     const fetchRecentSubmissions = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/user/submissions/recent', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/user/submissions/recent`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (response.data.success) {
@@ -56,7 +56,7 @@ const Profile = () => {
 
     const fetchChartsData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/user/charts', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/user/charts`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (response.data.success) {
