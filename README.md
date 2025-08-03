@@ -122,7 +122,7 @@ CodePath is deployed using a **modular microservices architecture** to ensure sc
 Have feedback or want to collaborate?
 
 - Open an issue or PR on GitHub  
-- Email: saurabh7642@gmail.com
+- Email: saurabhkaushik7642@gmail.com
 
 ---
 
